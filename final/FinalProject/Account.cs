@@ -1,26 +1,51 @@
+using System.Collections.Generic;
+using System.IO;
+
 public class Account
 {
-    public int AccountNumber { get; set; }
-    public string PIN { get; set; }
+    public string AccountNumber { get; set; }
     public decimal Balance { get; set; }
+    public List<Transaction> Transactions { get; set; }
+    public int AccountNumbr { get; }
+    public string FullName { get; }
+    public double InitialDeposit { get; }
+    public string Pinn { get; }
 
-    public decimal GetBalance()
+    public Account(string accountNumber, decimal balance, List<Transaction> transactions)
     {
-        return Balance;
+        AccountNumber = accountNumber;
+        Balance = balance;
+        Transactions = transactions;
     }
 
-    public void Withdraw(decimal amount)
+    public Account(int accountNumbr, string fullName, double initialDeposit, string pinn)
     {
-        Balance -= amount;
+        AccountNumbr = accountNumbr;
+        FullName = fullName;
+        InitialDeposit = initialDeposit;
+        Pinn = pinn;
     }
 
-    public void Deposit(decimal amount)
+    public void GetAccountDetails(Database database)
     {
-        Balance += amount;
-    }
+        // read the account details from the CSV file
+        string[] lines = File.ReadAllLines("AccountDetails.csv");
 
-    internal void GetAccountDetails(Database database, Error error)
-    {
-        throw new NotImplementedException();
+        foreach (string line in lines)
+        {
+            string[] fields = line.Split(',');
+
+            // retrieve account details from the fields
+            string accountNumber = fields[0];
+            decimal accountBalance = decimal.Parse(fields[1]);
+            List<Transaction> transactions = new List<Transaction>();
+            // and so on...
+
+            // create an Account object with the retrieved details
+            Account account = new Account(accountNumber, accountBalance, transactions);
+
+            // add the account to the database
+            database.AddAccount(account);
+        }
     }
 }

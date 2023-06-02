@@ -1,56 +1,76 @@
+using CsvHelper;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Globalization;
+
+
 public class Database
 {
-    private IEnumerable<object> results;
+    public string AccountsFilePath { get; set; }
+    public List<Account> Accounts { get; set; }
 
-    public string ConnectionString { get; set; }
-    public IEnumerable<string> SQLCommands { get; set; }
-
-    internal static decimal GetBalance(int accountNumber)
+    public Database(string accountsFilePath)
     {
-        throw new NotImplementedException();
+        AccountsFilePath = accountsFilePath;
+        Accounts = new List<Account>();
+        LoadAccounts();
     }
 
-    internal static IEnumerable<object> GetDepositTransactionDetails(int accountNumber, double amount)
+    public void AddAccount(Account account)
     {
-        throw new NotImplementedException();
+        Accounts.Add(account);
+        SaveAccounts();
     }
 
-    internal static IEnumerable<object> GetTransactionDetails(int transactionID)
+    public decimal GetBalance(string accountNumber)
     {
-        throw new NotImplementedException();
-    }
-
-    internal static IEnumerable<object> GetWithdrawalTransactionDetails(int accountNumber, double amount)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Connect()
-    {
-        // TODO: Implement this method
-    }
-
-    public void Disconnect()
-    {
-        // TODO: Implement this method
-    }
-
-    public IEnumerable<object> ExecuteQuery(string query)
-    {
-        try
+        var account = Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+        if (account != null)
         {
-            // Execute the query
-
-            // Return the results
-            return results;
+            return account.Balance;
         }
-        catch (Exception ex)
+        else
         {
-            // Handle the exception
-            Console.WriteLine("An error occurred: " + ex.Message);
+            throw new Exception("Account not found");
+        }
+    }
+    private void LoadAccounts()
+    {
+        if (File.Exists(AccountsFilePath))
+        {
+            using (var reader = new StreamReader(AccountsFilePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    var values = line.Split(',');
+                    var accountNumber = values[0];
+                    var balance = decimal.Parse(values[1]);
+                    var transactions = new List<Transaction>();
+                    var account = new Account(accountNumber, balance, transactions);
+                    Accounts.Add(account);
+                }
+            }
+        }
+    }
 
-            // Return an empty sequence
-            return Enumerable.Empty<object>();
+    private void SaveAccounts()
+    {
+        using (var writer = new StreamWriter(AccountsFilePath))
+        {
+            foreach (var account in Accounts)
+            {
+                writer.WriteLine($"{account.AccountNumber},{account.Balance}");
+            }
+        }
+    }
+    public void SaveChanges()
+    {
+        using (var writer = new StreamWriter(AccountsFilePath))
+        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            csv.WriteRecords(Accounts);
         }
     }
 }

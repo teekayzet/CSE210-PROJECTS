@@ -1,47 +1,23 @@
 public class Withdrawal : Transaction
 {
-    internal double transactionFee;
+    public decimal Amount { get; set; }
 
-    public Withdrawal(double amount)
+    public Withdrawal(string transactionID, string accountNumber, string transactionType, decimal amount)
+        : base(transactionID, transactionType)
     {
         Amount = amount;
     }
 
-    public override void LogTransaction()
+    public void ProcessTransaction(Account account)
     {
-        // TODO: Implement this method
-    }
-
-    public override IEnumerable<object> GetTransactionDetails()
-    {
-        try
+        if (Amount > account.Balance)
         {
-            // Get the transaction details from the database
-            var results = Database.GetWithdrawalTransactionDetails(AccountNumber, Amount);
-
-            // Return the results
-            return results;
+            Console.WriteLine("Insufficient balance!");
         }
-        catch (Exception)
+        else
         {
-            // Handle the exception
-            // ...
-
-            // Return an empty sequence
-            return Enumerable.Empty<object>();
-        }
-    }
-
-    internal void ProcessTransaction(Account account, Database database, Authentication authentication, Error error)
-    {
-        throw new NotImplementedException();
-    }
-
-    public double TransactionFee
-    {
-        get
-        {
-            return Amount * 0.01;
+            account.Balance -= Amount;
+            Console.WriteLine("Transaction successful! Your new balance is: {0:C}", account.Balance);
         }
     }
 }

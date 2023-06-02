@@ -1,22 +1,16 @@
 public class Deposit : Transaction
 {
-    public Deposit(int accountNumber, double amount)
+    public decimal Amount { get; set; }
+
+    public Deposit(string transactionID, string accountNumber, string transactionType, decimal amount)
+        : base(transactionID, transactionType)
     {
-        AccountNumber = accountNumber;
         Amount = amount;
     }
 
-    public override void LogTransaction()
+    public void ProcessTransaction(Account account)
     {
-        // TODO: Implement this method
-    }
-
-    public override IEnumerable<object> GetTransactionDetails()
-    {
-        // Get the transaction details from the database
-        var results = Database.GetDepositTransactionDetails(AccountNumber, Amount);
-
-        // Return the results
-        return results;
+        account.Balance += Amount;
+        Console.WriteLine("Transaction successful! Your new balance is: {0:C}", account.Balance);
     }
 }

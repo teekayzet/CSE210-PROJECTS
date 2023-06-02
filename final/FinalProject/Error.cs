@@ -1,23 +1,10 @@
 public class Error
 {
-    public string ErrorMessage { get; set; }
+    public string Message { get; set; }
 
     public Error(string errorMessage)
     {
-        ErrorMessage = errorMessage;
+        Message = errorMessage;
     }
 
-    public Error()
-    {
-    }
-
-    public static Error GenerateErrorMessage(string errorMessage)
-    {
-        return new Error(errorMessage);
-    }
-
-    internal object GenerateErrorMessage(object errorMessage)
-    {
-        throw new NotImplementedException();
-    }
 }
